@@ -1,4 +1,5 @@
 var webpack = require('webpack');
+var HtmlWebpackPlugin = require('html-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var path = require("path");
 
@@ -6,13 +7,12 @@ var DIST_DIR = path.resolve(__dirname, "dist");
 var SRC_DIR = path.resolve(__dirname, "src");
 
 var config = {
-    entry: [
-        SRC_DIR + "/index.html",
-        SRC_DIR + "/js/index.js"
-    ],
+    entry: {
+        js: SRC_DIR + "/js/index.js"
+    },
     output: {
         path: DIST_DIR,
-        filename: "/js/bundle.js"
+        filename: "./js/bundle.js"
     },
     devServer: {
         contentBase: "dist",
@@ -22,9 +22,15 @@ var config = {
         open: true
     },
     plugins: [
-        // hotモードに必要なプラグイン
         new webpack.HotModuleReplacementPlugin(),
-        new ExtractTextPlugin('css/index.css'),
+        new HtmlWebpackPlugin({
+            template: SRC_DIR + '/index.html'
+        }),
+        new ExtractTextPlugin({
+            filename: 'css/index.css',
+            disable: false,
+            allChunks: true
+        }),
         new webpack.ProvidePlugin({
             THREE: 'three',
             OrbitControls: 'three-orbit-controls',
@@ -33,33 +39,35 @@ var config = {
     ],
     devtool: "source-map",
     module: {
-        loaders: [{
-                test: /\.html$/,
-                loader: "file?name=[name].[ext]"
-            },
+        loaders: [
             {
                 test: [/stats\.min\.js$/, /dat\.gui\.min\.js$/],
-                loader: "file?name=js/lib/[name].[ext]"
+                loader: "file-loader?name=js/lib/[name].[ext]"
             },
             {
                 test: /\.js$/,
                 exclude: [/node_modules/, /stats\.min\.js$/, /dat\.gui\.min\.js$/],
-                loader: "babel-loader",
-                query: {
-                    presets: ["es2015", "stage-3"]
-                }
+                      use: {
+                        loader: 'babel-loader',
+                        options: {
+                          presets: ['env']
+                        }
+                      }
             },
             {
                 test: /\.scss$/,
-                loader: ExtractTextPlugin.extract("style-loader", "css-loader!sass-loader")
+                use: ExtractTextPlugin.extract({
+                        fallback: ['style-loader'],
+                        use: ['css-loader', 'sass-loader']
+                    })
             },
             {
                 test: /\.jpg|\.png$/,
-                loader: "file?name=img/[name].[ext]"
+                use: 'file-loader?name=img/[name].[ext]'
             },
             {
                 test: /\.mp3$/,
-                loader: "file?name=sound/[name].[ext]"
+                use: 'file-loader?name=sound/[name].[ext]'
             }
         ]
     }
