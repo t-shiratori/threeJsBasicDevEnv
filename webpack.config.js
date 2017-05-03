@@ -28,7 +28,7 @@ var config = {
         }),
         new ExtractTextPlugin({
             filename: 'css/index.css',
-            disable: false,
+            disable: true,
             allChunks: true
         }),
         new webpack.ProvidePlugin({
@@ -62,7 +62,7 @@ var config = {
                     })
             },
             {
-                test: /\.jpg|\.png$/,
+                test: /\.gif|\.jpg|\.png$/,
                 use: 'file-loader?name=img/[name].[ext]'
             },
             {
