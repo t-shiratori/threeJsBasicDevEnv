@@ -29,9 +29,6 @@ class Main {
             this.fullscreen = false;
         };
 
-        // 通常gainNodeのvalueは-1にしないとミュートにならないが、
-        // THREE.Audioは0でミュートになるように作られている模様
-        // またanalyserの解析値と連動するようにもなっている模様
         gui.add(this.datControls, 'helper');
         gui.add(this.datControls, 'fullscreen').onChange((e) => {
             if (e) {
