@@ -1,74 +1,106 @@
-var webpack = require('webpack');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var path = require("path");
+const webpack = require('webpack');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const path = require('path');
+const glob = require('glob');
+const _ = require('lodash');
 
-var DIST_DIR = path.resolve(__dirname, "dist");
-var SRC_DIR = path.resolve(__dirname, "src");
+const DIST_DIR = path.resolve(__dirname, './dist');
 
-var config = {
-    entry: {
-        js: SRC_DIR + "/js/index.js"
+const getProjectDirName = /.+\/src\/([^/]+)\//;
+
+// jsエントリーポイントオブジェクト作成
+const entryJsPasses = glob.sync(`./src/**/index.js`);
+const entryJsKeys = _.map(entryJsPasses, (pass) => {
+    return pass.match(getProjectDirName)[1]
+})
+const entriesJs = _.zipObject(entryJsKeys, entryJsPasses)
+
+/* プラグイン
+------------------------------------------------------- */
+let plugins = [
+    // hotモードに必要なプラグイン
+    new webpack.HotModuleReplacementPlugin()
+];
+
+// html コピー
+_.map(glob.sync(`./src/**/index.html`), (pass) => {
+    plugins.push(new CopyWebpackPlugin([
+        {from: pass, to: pass.replace('src/', '')}
+    ]))
+})
+
+// libファイルコピー
+_.map(glob.sync(`./src/**/lib/*.js`), (pass) => {
+    plugins.push(new CopyWebpackPlugin([
+        {from: pass, to: pass.replace('src/', '')}
+    ]))
+})
+
+// css コンパイル & 外部ファイル化
+plugins.push(new ExtractTextPlugin({
+    filename: (getPath) => {
+        const dirName = getPath('[name]')
+        return dirName.replace(`${dirName}`, `${dirName}/css/index.css`);
     },
+    allChunks: true
+}))
+
+plugins.push(new webpack.ProvidePlugin({
+    THREE: 'three',
+    OrbitControls: 'three-orbit-controls',
+    SimplexNoise: 'simplex-noise'
+}))
+
+/* config
+------------------------------------------------------- */
+const config = {
+    entry: entriesJs,
     output: {
         path: DIST_DIR,
-        filename: "./js/bundle.js"
+        filename: '[name]/js/bandle.js'
     },
     devServer: {
-        contentBase: "dist",
+        contentBase: 'dist',
         inline: true,
         hot: true,
-        port: 9999,
-        open: true
+        open: true,
+        port: 9999
     },
-    plugins: [
-        new webpack.HotModuleReplacementPlugin(),
-        new HtmlWebpackPlugin({
-            template: SRC_DIR + '/index.html'
-        }),
-        new ExtractTextPlugin({
-            filename: 'css/index.css',
-            disable: true,
-            allChunks: true
-        }),
-        new webpack.ProvidePlugin({
-            THREE: 'three',
-            OrbitControls: 'three-orbit-controls',
-            SimplexNoise :'simplex-noise'
-        })
-    ],
-    devtool: "source-map",
+    plugins: plugins,
+    devtool: 'source-map',
     module: {
-        loaders: [
-            {
-                test: [/stats\.min\.js$/, /dat\.gui\.min\.js$/],
-                loader: "file-loader?name=js/lib/[name].[ext]"
-            },
-            {
-                test: /\.js$/,
-                exclude: [/node_modules/, /stats\.min\.js$/, /dat\.gui\.min\.js$/],
+        rules: [{
+                    test: /\.html$/,
+                    loader: 'html-loader'
+                },
+                {
+                    test: /\.js$/,
+                      exclude: /(node_modules|bower_components|[/stats\.min\.js$/, /dat\.gui\.min\.js$/])/,
                       use: {
                         loader: 'babel-loader',
                         options: {
-                          presets: ['env']
+                          presets: [
+                            ['env', {modules: false}]
+                          ]
                         }
                       }
-            },
-            {
-                test: /\.scss$/,
-                use: ExtractTextPlugin.extract({
+                },
+                {
+                    test: /\.scss$/,
+                    use: ExtractTextPlugin.extract({
                         fallback: ['style-loader'],
                         use: ['css-loader', 'sass-loader']
                     })
-            },
-            {
-                test: /\.gif|\.jpg|\.png$/,
-                use: 'file-loader?name=img/[name].[ext]'
-            },
-            {
-                test: /\.mp3$/,
-                use: 'file-loader?name=sound/[name].[ext]'
-            }
+                },
+                {
+                    test: /\.jpg|\.png$/,
+                    use: 'file-loader?name=img/[name].[ext]'
+                },
+                {
+                    test: /\.mp3$/,
+                    use: 'file-loader?name=sound/[name].[ext]'
+                }
         ]
     }
 };
