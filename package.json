@@ -1,8 +1,8 @@
 {
-  "name": "p5-dev-env-webpack",
-  "description": "sketches by p5.js",
+  "name": "three-js-basic",
+  "description": "Basic development environment of three.js",
   "keywords": [
-    "p5"
+    "three.js"
   ],
   "version": "1.0.0",
   "scripts": {
@@ -12,6 +12,7 @@
   },
   "repository": {},
   "license": "MIT",
+  "author": "takashi shiratori",
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
