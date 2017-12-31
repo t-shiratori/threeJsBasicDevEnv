@@ -69,7 +69,7 @@ class Main {
         this.scene.add(this.helper.gridHelper);
 
         // add helper axes
-        this.helper.axes = new THREE.AxisHelper(5);
+        this.helper.axes = new THREE.AxesHelper(5);
         this.scene.add(this.helper.axes);
 
         // add particle
