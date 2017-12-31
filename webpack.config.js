@@ -73,10 +73,10 @@ const config = {
         rules: [{
                     test: /\.html$/,
                     loader: 'html-loader'
-                },
+                },    
                 {
                     test: /\.js$/,
-                      exclude: /(node_modules|bower_components|[/stats\.min\.js$/, /dat\.gui\.min\.js$/])/,
+                      exclude: /(node_modules|bower_components)/,
                       use: {
                         loader: 'babel-loader',
                         options: {
