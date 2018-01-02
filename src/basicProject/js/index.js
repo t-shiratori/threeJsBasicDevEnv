@@ -1,4 +1,3 @@
-// リソース
 import './assets';
 
 // js モジュール
