@@ -100,6 +100,10 @@ const config = {
                 {
                     test: /\.mp3$/,
                     use: 'file-loader?name=sound/[name].[ext]'
+                },
+                {
+                    test: /fonts\/**\/\.json$/,
+                    use: 'file-loader?name=fonts/[name].[ext]'
                 }
         ]
     }
